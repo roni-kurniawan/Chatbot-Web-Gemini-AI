@@ -40,7 +40,7 @@ export default function handler(req: any, res: any) {
     status: "ok",
     hasApiKey: Boolean(key),
     envSource: sourceName || null,
-    model: "gemini-3.8-flash",
+    model: "gemini-3.1-flash-lite",
     platform: process.env.VERCEL ? "vercel" : "standalone",
     timestamp: new Date().toISOString(),
   };
