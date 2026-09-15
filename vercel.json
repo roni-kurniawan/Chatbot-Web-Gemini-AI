@@ -2,27 +2,15 @@
   "version": 2,
   "framework": "vite",
   "outputDirectory": "dist",
-  "rewrites": [
-    {
-      "source": "/api/chat/stream",
-      "destination": "/api/chat/stream"
-    },
-    {
-      "source": "/api/health",
-      "destination": "/api/health"
-    },
-    {
-      "source": "/api/(.*)",
-      "destination": "/api"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/index.html"
-    }
-  ],
   "functions": {
     "api/**/*.ts": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/((?!api/).*)",
+      "destination": "/index.html"
+    }
+  ]
 }

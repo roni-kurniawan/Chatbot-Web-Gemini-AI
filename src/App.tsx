@@ -281,10 +281,35 @@ export default function App() {
       });
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        throw new Error(
-          errorData.error || `Koneksi gagal dengan status ${response.status}`
-        );
+        let errorMsg = '';
+        try {
+          const contentType = response.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorData.message;
+          } else {
+            const rawText = await response.text();
+            if (rawText && rawText.length < 500 && !rawText.includes('<!DOCTYPE')) {
+              errorMsg = rawText.trim();
+            }
+          }
+        } catch {
+          // ignore parsing error
+        }
+
+        if (!errorMsg) {
+          if (response.status === 500) {
+            errorMsg =
+              'Koneksi server gagal (Status 500). Pastikan variabel lingkungan GEMINI_API_KEY sudah ditambahkan pada Vercel Dashboard (Settings > Environment Variables) lalu lakukan Redeploy pada project Anda.';
+          } else if (response.status === 404) {
+            errorMsg =
+              'Endpoint API tidak ditemukan (Status 404). Pastikan endpoint /api/chat/stream terpasang.';
+          } else {
+            errorMsg = `Koneksi gagal dengan status ${response.status}.`;
+          }
+        }
+
+        throw new Error(errorMsg);
       }
 
       const reader = response.body?.getReader();

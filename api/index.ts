@@ -1,5 +1,5 @@
-import app from "./_app";
+import healthHandler from "./health";
 
 export default function handler(req: any, res: any) {
-  return app(req, res);
+  return healthHandler(req, res);
 }

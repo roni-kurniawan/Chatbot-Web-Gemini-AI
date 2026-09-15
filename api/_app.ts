@@ -1,12 +1,17 @@
 import express from "express";
-import { handleHealthCheck, handleChatStream } from "./_geminiCore";
+import streamHandler from "./chat/stream";
+import healthHandler from "./health";
 
 const app = express();
 
 app.use(express.json({ limit: "25mb" }));
 
-// Mount endpoints on both `/api/*` and `/*` to guarantee matching under any proxy/Vercel rewrite setup
-app.get(["/api/health", "/health"], handleHealthCheck);
-app.post(["/api/chat/stream", "/chat/stream"], handleChatStream);
+app.all(["/api/health", "/health"], (req, res) => {
+  return healthHandler(req, res);
+});
+
+app.all(["/api/chat/stream", "/chat/stream"], (req, res) => {
+  return streamHandler(req, res);
+});
 
 export default app;
