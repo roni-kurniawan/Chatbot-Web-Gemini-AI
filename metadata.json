@@ -1,0 +1,6 @@
+{
+  "name": "Gusti Roni Kurniawan",
+  "description": "Website resmi dan asisten AI pintar Gusti Roni Kurniawan dengan kemampuan percakapan interaktif dan kecerdasan artifisial responsif.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
