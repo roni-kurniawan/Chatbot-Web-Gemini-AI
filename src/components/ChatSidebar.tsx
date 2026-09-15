@@ -62,7 +62,6 @@ export function ChatSidebar({
                   Real-Time
                 </span>
               </h1>
-              <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Gemini 3.8 Flash AI</p>
             </div>
           </div>
 
