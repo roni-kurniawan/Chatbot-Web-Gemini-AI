@@ -175,7 +175,7 @@ export function ChatSidebar({
           <div className="flex items-center justify-between px-2 text-[11px] text-zinc-500 dark:text-zinc-400">
             <span
               className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium"
-              title="Fitur beban seimbang acak dan auto-failover aktif untuk mencegah reach limit"
+              title="Fitur auto-failover aktif: 3.5-flash-lite sebagai utama, jika limit beralih ke yang lain"
             >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               Auto Multi-Model
@@ -184,7 +184,7 @@ export function ChatSidebar({
               className="text-zinc-400 dark:text-zinc-500 font-mono truncate max-w-[130px] text-right"
               title={activeModel ? `Model aktif saat ini: ${activeModel}` : "Pilihan otomatis rotasi pool"}
             >
-              {activeModel || "Auto (Acak)"}
+              {activeModel || "Default: 3.5-flash-lite"}
             </span>
           </div>
 

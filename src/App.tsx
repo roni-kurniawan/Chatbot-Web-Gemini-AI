@@ -65,7 +65,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
-  const [activeModel, setActiveModel] = useState<string>('Auto (Acak)');
+  const [activeModel, setActiveModel] = useState<string>('Default: 3.5-flash-lite');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatScrollContainerRef = useRef<HTMLDivElement>(null);

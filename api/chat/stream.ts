@@ -3,22 +3,25 @@ import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 
-// Active pool of fast, verified Gemini models for dynamic load-balancing and auto-failover
-// Uses reliable flash-lite and flash-latest models to avoid 503 high-demand spikes
-const MODEL_POOL = [
-  "gemini-3.5-flash-lite",
+// Primary model is always attempted first for the fastest response
+const PRIMARY_MODEL = "gemini-3.5-flash-lite";
+
+// Fallback models are used if the primary model hits a rate limit or 503 error
+const FALLBACK_MODELS = [
   "gemini-3.1-flash-lite",
   "gemini-flash-latest",
 ];
 
-// Helper to get randomized/shuffled model candidates to evenly distribute load and avoid per-model rate limits
+// Helper to get model candidates with Primary always first, followed by randomized fallbacks
 function getLoadBalancedModelCandidates(): string[] {
-  const candidates = [...MODEL_POOL];
-  for (let i = candidates.length - 1; i > 0; i--) {
+  const fallbacks = [...FALLBACK_MODELS];
+  // Shuffle fallbacks to evenly distribute load if primary fails
+  for (let i = fallbacks.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+    [fallbacks[i], fallbacks[j]] = [fallbacks[j], fallbacks[i]];
   }
-  return candidates;
+  // Always return primary model as the very first candidate
+  return [PRIMARY_MODEL, ...fallbacks];
 }
 
 // Helper to retrieve and clean Gemini API Key from multiple common environment variable names
