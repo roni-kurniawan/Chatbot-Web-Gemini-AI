@@ -5,7 +5,7 @@ dotenv.config();
 
 // Priority list of Gemini models with failover
 const MODEL_FALLBACK_LIST = [
-  "gemini-3.1-flash-lite",
+  "gemini-2.5-flash-lite",
   "gemini-3.8-flash",
   "gemini-flash-latest",
 ];

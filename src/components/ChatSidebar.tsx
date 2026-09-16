@@ -175,7 +175,7 @@ export function ChatSidebar({
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               API Terhubung
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-mono">gemini-3.1-flash-lite</span>
+            <span className="text-zinc-400 dark:text-zinc-500 font-mono">gemini-2.5-flash-lite</span>
           </div>
 
           {onToggleTheme && (
