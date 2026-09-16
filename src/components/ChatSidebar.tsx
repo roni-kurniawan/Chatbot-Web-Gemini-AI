@@ -157,7 +157,7 @@ export function ChatSidebar({
                       e.stopPropagation();
                       onDeleteSession(session.id);
                     }}
-                    className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-zinc-400 dark:text-zinc-400 hover:text-red-500 dark:hover:text-red-400 hover:bg-zinc-200 dark:hover:bg-zinc-700/60 transition-all cursor-pointer"
+                    className="p-1 rounded-md text-zinc-400 dark:text-zinc-500 hover:text-red-500 dark:hover:text-red-400 hover:bg-zinc-200 dark:hover:bg-zinc-700/60 transition-all cursor-pointer opacity-100"
                     title="Hapus percakapan"
                   >
                     <Trash2 className="w-3.5 h-3.5" />
