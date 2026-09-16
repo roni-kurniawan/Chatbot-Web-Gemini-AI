@@ -3,12 +3,23 @@ import { GoogleGenAI } from "@google/genai";
 
 dotenv.config();
 
-// Priority list of Gemini models with failover
-const MODEL_FALLBACK_LIST = [
+// Active pool of fast, verified Gemini models for dynamic load-balancing and auto-failover
+// Uses reliable flash-lite and flash-latest models to avoid 503 high-demand spikes
+const MODEL_POOL = [
   "gemini-3.5-flash-lite",
-  "gemini-3.8-flash",
+  "gemini-3.1-flash-lite",
   "gemini-flash-latest",
 ];
+
+// Helper to get randomized/shuffled model candidates to evenly distribute load and avoid per-model rate limits
+function getLoadBalancedModelCandidates(): string[] {
+  const candidates = [...MODEL_POOL];
+  for (let i = candidates.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [candidates[i], candidates[j]] = [candidates[j], candidates[i]];
+  }
+  return candidates;
+}
 
 // Helper to retrieve and clean Gemini API Key from multiple common environment variable names
 function getGeminiApiKey(): { key: string | undefined; sourceName: string | undefined } {
@@ -211,9 +222,13 @@ export default async function handler(req: any, res: any) {
 
     let streamSucceeded = false;
     let lastError: any = null;
+    let activeModelName = "";
 
-    // Try models in fallback order
-    for (const modelName of MODEL_FALLBACK_LIST) {
+    // Iterate through randomized model candidates to distribute load
+    const candidateModels = getLoadBalancedModelCandidates();
+
+    for (const modelName of candidateModels) {
+      let chunksEmitted = 0;
       try {
         const responseStream = await ai.models.generateContentStream({
           model: modelName,
@@ -224,7 +239,14 @@ export default async function handler(req: any, res: any) {
         for await (const chunk of responseStream) {
           const text = chunk.text;
           if (text) {
-            res.write(`data: ${JSON.stringify({ text })}\n\n`);
+            // If this is the very first successful chunk, inform the client which model is actively streaming
+            if (chunksEmitted === 0) {
+              activeModelName = modelName;
+              res.write(`data: ${JSON.stringify({ model: modelName })}\n\n`);
+            }
+
+            res.write(`data: ${JSON.stringify({ text, model: modelName })}\n\n`);
+            chunksEmitted++;
             if (typeof res.flush === "function") {
               res.flush();
             }
@@ -235,21 +257,39 @@ export default async function handler(req: any, res: any) {
         break;
       } catch (err: any) {
         lastError = err;
-        console.warn(`Model ${modelName} stream encountered error:`, err?.message || err);
-        const errStr = String(err?.message || err);
-        if (errStr.includes("503") || errStr.includes("UNAVAILABLE") || errStr.includes("429")) {
+        const errStr = String(err?.message || err).toLowerCase();
+        console.info(`[Auto-Failover] Model candidate ${modelName} encountered: ${err?.status || err?.code || "temporary issue"}. Trying next candidate...`);
+
+        // If chunks were already written to client, we cannot cleanly switch models mid-output
+        if (chunksEmitted > 0) {
+          break;
+        }
+
+        // If it's a rate limit, quota exhaustion, 429, 503, or temporary outage, try the next model
+        if (
+          errStr.includes("429") ||
+          errStr.includes("quota") ||
+          errStr.includes("resource_exhausted") ||
+          errStr.includes("rate limit") ||
+          errStr.includes("503") ||
+          errStr.includes("unavailable") ||
+          errStr.includes("overloaded") ||
+          errStr.includes("not found")
+        ) {
+          console.info(`Auto-switching to another healthy Gemini model in pool...`);
           continue;
         } else {
-          break;
+          // If it's another non-quota error, still attempt next candidate if no chunks were emitted
+          continue;
         }
       }
     }
 
     if (!streamSucceeded) {
-      throw lastError || new Error("Gagal mendapatkan respon dari model Gemini.");
+      throw lastError || new Error("Gagal mendapatkan respon dari kumpulan model Gemini.");
     }
 
-    res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
+    res.write(`data: ${JSON.stringify({ done: true, model: activeModelName })}\n\n`);
     res.end();
   } catch (error: any) {
     console.error("Gemini stream error:", error);

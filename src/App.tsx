@@ -65,6 +65,7 @@ export default function App() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [showScrollBottom, setShowScrollBottom] = useState(false);
+  const [activeModel, setActiveModel] = useState<string>('Auto (Acak)');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const chatScrollContainerRef = useRef<HTMLDivElement>(null);
@@ -343,6 +344,10 @@ export default function App() {
               throw new Error(errMsg);
             }
 
+            if (data.model) {
+              setActiveModel(data.model);
+            }
+
             if (data.text) {
               accumulatedContent += data.text;
               const currentContent = accumulatedContent;
@@ -472,6 +477,7 @@ export default function App() {
         onSelectPersona={(id) => setCurrentPersonaId(id)}
         isDarkMode={isDarkMode}
         onToggleTheme={() => setIsDarkMode(!isDarkMode)}
+        activeModel={activeModel}
       />
 
       {/* Main Chat Interface */}

@@ -15,6 +15,7 @@ interface ChatSidebarProps {
   onSelectPersona: (personaId: string) => void;
   isDarkMode?: boolean;
   onToggleTheme?: () => void;
+  activeModel?: string;
 }
 
 export function ChatSidebar({
@@ -30,6 +31,7 @@ export function ChatSidebar({
   onSelectPersona,
   isDarkMode,
   onToggleTheme,
+  activeModel,
 }: ChatSidebarProps) {
   return (
     <>
@@ -171,11 +173,19 @@ export function ChatSidebar({
         {/* Footer info, Theme Toggle & Clear History */}
         <div className="p-3 border-t border-zinc-200 dark:border-zinc-800 space-y-2.5 bg-zinc-50/70 dark:bg-zinc-950/40">
           <div className="flex items-center justify-between px-2 text-[11px] text-zinc-500 dark:text-zinc-400">
-            <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400">
+            <span
+              className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-medium"
+              title="Fitur beban seimbang acak dan auto-failover aktif untuk mencegah reach limit"
+            >
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              API Terhubung
+              Auto Multi-Model
             </span>
-            <span className="text-zinc-400 dark:text-zinc-500 font-mono">gemini-3.5-flash-lite</span>
+            <span
+              className="text-zinc-400 dark:text-zinc-500 font-mono truncate max-w-[130px] text-right"
+              title={activeModel ? `Model aktif saat ini: ${activeModel}` : "Pilihan otomatis rotasi pool"}
+            >
+              {activeModel || "Auto (Acak)"}
+            </span>
           </div>
 
           {onToggleTheme && (

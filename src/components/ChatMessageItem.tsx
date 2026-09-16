@@ -74,10 +74,9 @@ export function ChatMessageItem({
       utterance.voice = selectedVoice;
     }
 
-    // Memanipulasi nada dan kecepatan agar terdengar seperti pria dewasa
-    // Pitch direndahkan agar lebih berat, rate sedikit dipercepat
-    utterance.pitch = 0.6; 
-    utterance.rate = 1.05; 
+    // Memanipulasi nada dan kecepatan agar terdengar seperti pria biasa dengan intonasi tegas dan cepat
+    utterance.pitch = 0.88; 
+    utterance.rate = 1.20; 
 
     utterance.onend = () => setIsPlaying(false);
     utterance.onerror = () => setIsPlaying(false);
