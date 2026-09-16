@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'motion/react';
-import { Bot, User, Copy, Check, RotateCcw, AlertCircle } from 'lucide-react';
+import { Bot, User, Copy, Check, RotateCcw, AlertCircle, Volume2, Square } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { ChatMessage } from '../types';
 
@@ -19,8 +19,72 @@ export function ChatMessageItem({
 }: ChatMessageItemProps) {
   const [copied, setCopied] = useState(false);
   const [copiedCodeIndex, setCopiedCodeIndex] = useState<number | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const isUser = message.role === 'user';
+
+  const handlePlaySound = () => {
+    if (!message.content) return;
+    
+    if (isPlaying) {
+      window.speechSynthesis.cancel();
+      setIsPlaying(false);
+      return;
+    }
+
+    // Bersihkan semua antrean sebelumnya
+    window.speechSynthesis.cancel();
+
+    // Hapus simbol markdown agar tidak dibacakan (misal: **, *, #, `, _, dll)
+    const cleanText = message.content.replace(/[*#`_~>]/g, '');
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    
+    // Wajibkan bahasa Indonesia
+    utterance.lang = 'id-ID';
+    
+    // Cari suara dan coba temukan suara pria Indonesia jika memungkinkan
+    const voices = window.speechSynthesis.getVoices();
+    
+    // Prioritas 1: Suara pria Indonesia eksplisit (seperti Microsoft Andika)
+    let selectedVoice = voices.find((v) => 
+      (v.lang === 'id-ID' || v.lang === 'id_ID' || v.lang === 'id') && 
+      (v.name.toLowerCase().includes('male') || v.name.toLowerCase().includes('pria') || v.name.toLowerCase().includes('andika'))
+    );
+    
+    // Cadangan 1: Suara Indonesia apa saja, TAPI hindari nama wanita yang jelas jika memungkinkan (seperti Damayanti/Gadis)
+    if (!selectedVoice) {
+      selectedVoice = voices.find((v) => 
+        (v.lang === 'id-ID' || v.lang === 'id_ID' || v.lang === 'id' || v.name.includes('Indonesia')) &&
+        !v.name.toLowerCase().includes('female') && 
+        !v.name.toLowerCase().includes('wanita') &&
+        !v.name.toLowerCase().includes('gadis') &&
+        !v.name.toLowerCase().includes('damayanti')
+      );
+    }
+
+    // Cadangan 2: Suara Indonesia apa saja (jika memang hanya itu yang ada di perangkat)
+    if (!selectedVoice) {
+      selectedVoice = voices.find((v) => 
+        v.lang === 'id-ID' || v.lang === 'id_ID' || v.lang === 'id' || v.name.includes('Indonesia')
+      );
+    }
+    
+    if (selectedVoice) {
+      utterance.voice = selectedVoice;
+    }
+
+    // Memanipulasi nada dan kecepatan agar terdengar seperti pria dewasa
+    // Pitch direndahkan agar lebih berat, rate sedikit dipercepat
+    utterance.pitch = 0.6; 
+    utterance.rate = 1.05; 
+
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+    
+    window.speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+  };
 
   const handleCopy = () => {
     if (!message.content) return;
@@ -222,6 +286,26 @@ export function ChatMessageItem({
                     <>
                       <Copy className="w-3.5 h-3.5" />
                       <span>Salin</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  id={`play-sound-btn-${message.id}`}
+                  type="button"
+                  onClick={handlePlaySound}
+                  className="flex items-center gap-1.5 px-2.5 py-1 text-xs font-medium text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-200/60 dark:hover:bg-zinc-800/60 rounded-lg transition-colors cursor-pointer"
+                  title={isPlaying ? "Hentikan Suara" : "Putar Suara"}
+                >
+                  {isPlaying ? (
+                    <>
+                      <Square className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 fill-current" />
+                      <span className="text-blue-600 dark:text-blue-400">Hentikan</span>
+                    </>
+                  ) : (
+                    <>
+                      <Volume2 className="w-3.5 h-3.5" />
+                      <span>Putar Suara</span>
                     </>
                   )}
                 </button>
