@@ -5,6 +5,7 @@
 
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowDown, AlertTriangle } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import { ChatMessage, ChatSession } from './types';
 import { PERSONAS } from './data/personas';
 import { ChatSidebar } from './components/ChatSidebar';
@@ -462,7 +463,9 @@ export default function App() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
+    <>
+      <Analytics />
+      <div className="flex h-screen w-full overflow-hidden bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 font-sans antialiased">
       {/* Responsive Collapsible Sidebar */}
       <ChatSidebar
         sessions={sessions}
@@ -548,5 +551,6 @@ export default function App() {
         />
       </main>
     </div>
+    </>
   );
 }
